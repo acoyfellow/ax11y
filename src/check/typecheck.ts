@@ -44,15 +44,29 @@ export function typecheckExamples(context: CheckContext): Array<{ line: number; 
   return results;
 }
 
+export function moduleExports(entryPath: string, options: { allowJs?: boolean; resolveDefault?: boolean } = {}): Set<string> {
+  const program = ts.createProgram([entryPath], {
+    allowJs: options.allowJs,
+    checkJs: false,
+    module: ts.ModuleKind.NodeNext,
+    moduleResolution: ts.ModuleResolutionKind.NodeNext,
+    noEmit: true,
+    noLib: true,
+    target: ts.ScriptTarget.ES2022,
+  });
+  const source = program.getSourceFile(entryPath);
+  if (!source) return new Set();
+  const checker = program.getTypeChecker();
+  const module = checker.getSymbolAtLocation(source);
+  if (!module) return new Set();
+  return new Set(checker.getExportsOfModule(module).map((symbol) => {
+    if (!options.resolveDefault || symbol.getName() !== "default") return symbol.getName();
+    const target = symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
+    const name = target.valueDeclaration && ts.getNameOfDeclaration(target.valueDeclaration);
+    return name && ts.isIdentifier(name) ? name.text : target.getName();
+  }));
+}
+
 export function declaredExports(context: CheckContext): Set<string> {
-  const names = new Set<string>();
-  if (!context.typesPath) return names;
-  const source = ts.createSourceFile(context.typesPath, ts.sys.readFile(context.typesPath) ?? "", ts.ScriptTarget.Latest, true);
-  for (const statement of source.statements) {
-    if (!ts.canHaveModifiers(statement) || !ts.getModifiers(statement)?.some((item) => item.kind === ts.SyntaxKind.ExportKeyword)) continue;
-    if ((ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) names.add(statement.name.text);
-    if (ts.isVariableStatement(statement)) for (const declaration of statement.declarationList.declarations) if (ts.isIdentifier(declaration.name)) names.add(declaration.name.text);
-    if (ts.isExportDeclaration(statement) && statement.exportClause && ts.isNamedExports(statement.exportClause)) for (const element of statement.exportClause.elements) names.add(element.name.text);
-  }
-  return names;
+  return context.typesPath ? moduleExports(context.typesPath) : new Set();
 }
