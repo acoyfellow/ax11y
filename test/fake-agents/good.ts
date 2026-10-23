@@ -1,0 +1,12 @@
+import { writeFileSync } from "node:fs";
+const prompt = await Bun.stdin.text();
+writeFileSync("solution.mjs", 'import { greet } from "greeter-fixture";\nconsole.log(greet("Ada"));\n');
+writeFileSync(".prompt-seen.txt", prompt);
+console.log(JSON.stringify({ type: "tool_execution_start" }));
+console.log(JSON.stringify({ type: "message_update", message: { role: "assistant", usage: { totalTokens: 99999, cost: { total: 9 } } } }));
+console.log(JSON.stringify({ type: "message_end", message: { role: "assistant", usage: { totalTokens: 1200, cost: { total: 0.01 } } } }));
+console.log(JSON.stringify({ type: "turn_end", message: { role: "assistant", usage: { totalTokens: 1200, cost: { total: 0.01 } } } }));
+console.log(JSON.stringify({ type: "tool_execution_start" }));
+console.log(JSON.stringify({ type: "message_update", message: { role: "assistant", usage: { totalTokens: 99999, cost: { total: 9 } } } }));
+console.log(JSON.stringify({ type: "message_end", message: { role: "assistant", usage: { totalTokens: 800, cost: { total: 0.005 } } } }));
+console.log(JSON.stringify({ type: "turn_end", message: { role: "assistant", usage: { totalTokens: 800, cost: { total: 0.005 } } } }));
