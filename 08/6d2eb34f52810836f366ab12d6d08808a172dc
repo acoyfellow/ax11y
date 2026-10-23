@@ -1,0 +1,113 @@
+.gitignore
+  s_87bb0cc3d5fc34::t_82e42b1078a6a8 1-5
+DESIGN.md
+  s_87bb0cc3d5fc34::t_e29cbff3fce7ac 1-59
+LICENSE
+  s_87bb0cc3d5fc34::t_0f8cbd06230795 1-9
+bun.lock
+  s_87bb0cc3d5fc34::t_74d99b90450923 1-134
+fixtures/clean/README.md
+  s_87bb0cc3d5fc34::t_085204f43a2771 1-18
+fixtures/clean/index.d.ts
+  s_87bb0cc3d5fc34::t_73e1fcb60af582 1-3
+fixtures/clean/index.js
+  s_87bb0cc3d5fc34::t_df09055f1e679e 1-9
+fixtures/clean/llms.txt
+  s_87bb0cc3d5fc34::t_906837f9f91a5f 1-7
+fixtures/clean/package.json
+  s_87bb0cc3d5fc34::t_3b99614db870ee 1-8
+fixtures/planted-entry-resolves/README.md
+  s_87bb0cc3d5fc34::t_0755e28b43a6da 1-18
+fixtures/planted-entry-resolves/index.d.ts
+  s_87bb0cc3d5fc34::t_fd5ea36c18237d 1-3
+fixtures/planted-entry-resolves/index.js
+  s_87bb0cc3d5fc34::t_cf88168d1e9368 1-9
+fixtures/planted-entry-resolves/llms.txt
+  s_87bb0cc3d5fc34::t_513f371cbbb4cb 1-7
+fixtures/planted-entry-resolves/package.json
+  s_87bb0cc3d5fc34::t_36b8121256c896 1-8
+fixtures/planted-errors-actionable/README.md
+  s_87bb0cc3d5fc34::t_ee5543ce9bb1c5 1-18
+fixtures/planted-errors-actionable/index.d.ts
+  s_87bb0cc3d5fc34::t_d6a1a3da1c12d6 1-3
+fixtures/planted-errors-actionable/index.js
+  s_87bb0cc3d5fc34::t_4f49a9139c2f87 1-9
+fixtures/planted-errors-actionable/llms.txt
+  s_87bb0cc3d5fc34::t_481fab619903e4 1-7
+fixtures/planted-errors-actionable/package.json
+  s_87bb0cc3d5fc34::t_429d5f938ac29d 1-8
+fixtures/planted-exports-documented/README.md
+  s_87bb0cc3d5fc34::t_d2a0d2b9b62d05 1-18
+fixtures/planted-exports-documented/index.d.ts
+  s_87bb0cc3d5fc34::t_64c657c9f4656c 1-4
+fixtures/planted-exports-documented/index.js
+  s_87bb0cc3d5fc34::t_ddbb3d9b60eadf 1-13
+fixtures/planted-exports-documented/llms.txt
+  s_87bb0cc3d5fc34::t_a2dee4b9fe7887 1-7
+fixtures/planted-exports-documented/package.json
+  s_87bb0cc3d5fc34::t_a5676ce6e9f519 1-8
+fixtures/planted-llms-txt/README.md
+  s_87bb0cc3d5fc34::t_7afcb9c47ec9e0 1-18
+fixtures/planted-llms-txt/index.d.ts
+  s_87bb0cc3d5fc34::t_9dc8790985f1b5 1-3
+fixtures/planted-llms-txt/index.js
+  s_87bb0cc3d5fc34::t_657b7dc62cc420 1-9
+fixtures/planted-llms-txt/llms.txt
+  s_87bb0cc3d5fc34::t_9be2ba91df9b93 1-7
+fixtures/planted-llms-txt/package.json
+  s_87bb0cc3d5fc34::t_ff416ac67c037c 1-8
+fixtures/planted-readme-examples-typecheck/README.md
+  s_87bb0cc3d5fc34::t_80436d247a9c8a 1-18
+fixtures/planted-readme-examples-typecheck/index.d.ts
+  s_87bb0cc3d5fc34::t_451d1e47343b1a 1-3
+fixtures/planted-readme-examples-typecheck/index.js
+  s_87bb0cc3d5fc34::t_771fa50f264262 1-9
+fixtures/planted-readme-examples-typecheck/llms.txt
+  s_87bb0cc3d5fc34::t_77d5d3a14c8ec2 1-7
+fixtures/planted-readme-examples-typecheck/package.json
+  s_87bb0cc3d5fc34::t_bd8f1b64783259 1-8
+fixtures/planted-readme-imports-exist/README.md
+  s_87bb0cc3d5fc34::t_6ca6804f2d8e64 1-18
+fixtures/planted-readme-imports-exist/index.d.ts
+  s_87bb0cc3d5fc34::t_215959f324d556 1-3
+fixtures/planted-readme-imports-exist/index.js
+  s_87bb0cc3d5fc34::t_3923e8916120b0 1-9
+fixtures/planted-readme-imports-exist/llms.txt
+  s_87bb0cc3d5fc34::t_9af9f6a104d8c2 1-7
+fixtures/planted-readme-imports-exist/package.json
+  s_87bb0cc3d5fc34::t_0051f1e591800c 1-8
+fixtures/planted-readme-present/index.d.ts
+  s_87bb0cc3d5fc34::t_abe9b3b083bede 1-3
+fixtures/planted-readme-present/index.js
+  s_87bb0cc3d5fc34::t_b6f9b77b526adb 1-9
+fixtures/planted-readme-present/llms.txt
+  s_87bb0cc3d5fc34::t_b126a7223d7301 1-7
+fixtures/planted-readme-present/package.json
+  s_87bb0cc3d5fc34::t_af13fa81dbd9f1 1-8
+fixtures/planted-types-present/README.md
+  s_87bb0cc3d5fc34::t_be634a4587da75 1-18
+fixtures/planted-types-present/index.js
+  s_87bb0cc3d5fc34::t_4984eb6679d2af 1-9
+fixtures/planted-types-present/llms.txt
+  s_87bb0cc3d5fc34::t_a2b87f5a069f71 1-7
+fixtures/planted-types-present/package.json
+  s_87bb0cc3d5fc34::t_14605fc73e754f 1-7
+package.json
+  s_87bb0cc3d5fc34::t_510482d8edb14e 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "086d2eb34f52810836f366ab12d6d08808a172dc",
+  "prompts": {},
+  "sessions": {
+    "s_87bb0cc3d5fc34": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a12ab1-4f16-71b5-98b4-fa9e4f420c7f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jordan Coeyman <jcoeyman@cloudflare.com>"
+    }
+  }
+}
