@@ -1,0 +1,21 @@
+src/check/rules/readme-imports-exist.ts
+  s_b85905f96dd517::t_48a5b006d297a8 1-18
+src/check/rules/shared.ts
+  s_b85905f96dd517::t_2355e93c31885f 1-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "66b9e04ef6630c18354f0a136d0128e2541f09f4",
+  "prompts": {},
+  "sessions": {
+    "s_b85905f96dd517": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a020b4-a043-74cc-a847-d77b25c47662",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jordan Coeyman <jcoeyman@cloudflare.com>"
+    }
+  }
+}
