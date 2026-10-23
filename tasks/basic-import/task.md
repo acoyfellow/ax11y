@@ -1,0 +1,1 @@
+Use the npm package {{package}} already installed in node_modules. Use its README and package files to write solution.mjs. Import the package's main entry, call or read one documented export, and print a line starting exactly with AX11Y-OK. Do not install anything.

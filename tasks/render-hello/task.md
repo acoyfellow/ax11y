@@ -1,0 +1,1 @@
+Build a plain web page using the installed package {{package}}. Create index.html and main.js, mount the package in the page, write AX11Y-HELLO when ready, and expose window.termWrite(text) and window.termInput. Do not start a server or install packages.
