@@ -1,0 +1,7 @@
+# greeter-fixture
+
+> Two functions, greet and farewell, that return greeting strings, plus a VERSION constant.
+
+## Docs
+
+- [README](./README.md): quick start and API

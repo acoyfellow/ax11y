@@ -1,0 +1,8 @@
+{
+  "name": "greeter-fixture",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./index.d.ts",
+  "exports": { ".": { "types": "./index.d.ts", "default": "./index.js" } }
+}
