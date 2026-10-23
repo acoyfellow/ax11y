@@ -1,0 +1,33 @@
+test/data/pi-transcript.jsonl
+  s_87bb0cc3d5fc34::t_edb7fafebf020a 1-49
+test/fake-agents/fails.ts
+  s_87bb0cc3d5fc34::t_bc87de66420e37 1-6
+test/fake-agents/good.ts
+  s_87bb0cc3d5fc34::t_b7d6c5e114b69f 1-12
+test/fake-agents/hangs.ts
+  s_87bb0cc3d5fc34::t_a75db0331e1c2d 1-5
+test/fake-agents/invents.ts
+  s_87bb0cc3d5fc34::t_250d92b8980cbe 1-6
+test/fake-agents/peeks.ts
+  s_87bb0cc3d5fc34::t_ca48f2e8795ec2 1-7
+test/tasks/greet/check.ts
+  s_87bb0cc3d5fc34::t_9e7e8a8b72212c 1-2
+test/tasks/greet/task.md
+  s_87bb0cc3d5fc34::t_0177749ddbb29a 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "0dcfe6d01bf15ecfbba4f41447480ff474a60221",
+  "prompts": {},
+  "sessions": {
+    "s_87bb0cc3d5fc34": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a12ab1-4f16-71b5-98b4-fa9e4f420c7f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jordan Coeyman <jcoeyman@cloudflare.com>"
+    }
+  }
+}
