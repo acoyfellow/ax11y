@@ -139,8 +139,10 @@ test("checks an npm spec without running install scripts", () => {
 }, 120000);
 
 test("missing target fails with a clear message, not a stack trace", () => {
+  expect(require("node:fs").existsSync(join(repo, "src", "cli.ts"))).toBe(true);
   const { code, stdout, stderr } = cli(["check", join(repo, "does-not-exist-dir")]);
   expect(code).not.toBe(0);
+  expect(stdout + stderr).toContain("does-not-exist-dir");
   expect((stdout + stderr).toLowerCase()).toMatch(/not found|no such|does not exist/);
   expect(stdout + stderr).not.toMatch(/\n\s+at .+:\d+:\d+/);
 });
