@@ -1,0 +1,10 @@
+export { checkDirectory as check, formatHuman, shouldFail } from "./check/index.js";
+export { runTarget as run, summarize } from "./run/index.js";
+export { compareResults as compare } from "./report/compare.js";
+export { summarizeResult } from "./report/summary.js";
+export { rules } from "./rules.js";
+export type { Report } from "./check/index.js";
+export type { CheckContext, Finding, Level, ReadmeBlock, Rule } from "./check/types.js";
+export type { RunEntry, RunOptions, RunResult } from "./run/index.js";
+export type { Comparison } from "./report/compare.js";
+export type { ReportSummary } from "./report/summary.js";

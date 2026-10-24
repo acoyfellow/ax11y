@@ -32,9 +32,20 @@ function execute(command: string, args: string[], cwd: string, input: string | u
   });
 }
 
+function moduleDirectory(): string {
+  return dirname(fileURLToPath(import.meta.url));
+}
+
+function packageRoot(): string {
+  const candidates = [join(moduleDirectory(), ".."), join(moduleDirectory(), "..", "..")];
+  const root = candidates.find((candidate) => existsSync(join(candidate, "package.json")));
+  if (!root) throw new Error("Unable to locate ax11y package.json; reinstall the package and retry.");
+  return root;
+}
+
 function resolveTask(task: string): string {
   if (existsSync(task)) return task;
-  const builtin = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "tasks", task);
+  const builtin = join(packageRoot(), "tasks", task);
   if (existsSync(builtin)) return builtin;
   throw new Error(`Task not found: ${task}`);
 }
@@ -60,7 +71,7 @@ export async function runTarget(options: RunOptions): Promise<RunResult> {
       const check = processResult.timedOut ? { timedOut: true, output: "", code: null } : await execute("bun", [join(taskDirectory, "check.ts")], sandbox, undefined, 120000);
       runs.push({ index, pass: !processResult.timedOut && !check.timedOut && check.code === 0, tokens: metrics.tokens, costUsd: metrics.costUsd, toolCalls: metrics.toolCalls, turns: metrics.turns, wallMs: performance.now() - started, timedOut: processResult.timedOut, inventedImports: inventedImports(sandbox, loaded.directory), sandbox, transcript });
     }
-    const packageJson = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "..", "package.json"), "utf8")) as { version: string };
+    const packageJson = JSON.parse(readFileSync(join(packageRoot(), "package.json"), "utf8")) as { version: string };
     return { ax11yVersion: packageJson.version, agent: options.agent, model: options.model, task: basename(taskDirectory), target, date: new Date().toISOString(), runs };
   } finally { loaded.cleanup(); }
 }

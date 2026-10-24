@@ -1,9 +1,36 @@
 {
   "name": "ax11y",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Accessibility for coding agents: static checks and live agent runs that measure how easily an agent can use an npm package.",
   "type": "module",
   "license": "MIT",
+  "author": "Jordan Coeyman",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acoyfellow/ax11y.git"
+  },
+  "homepage": "https://github.com/acoyfellow/ax11y#readme",
+  "bugs": {
+    "url": "https://github.com/acoyfellow/ax11y/issues"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "accessibility",
+    "llms.txt",
+    "documentation",
+    "lint",
+    "a11y",
+    "coding-agents"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "engines": {
     "node": ">=20"
   },

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { delimiter, dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { checkDirectory, formatHuman, shouldFail } from "./check/index.js";
 import { loadTarget } from "./check/loader.js";
 import type { Level } from "./check/types.js";
@@ -18,9 +20,19 @@ Usage:
   ax11y tasks
   ax11y --help`;
 
-function fail(message: string): never {
+function fail(message: string, code = 1): never {
   process.stderr.write(`${message}\n`);
-  process.exit(1);
+  process.exit(code);
+}
+
+function bunAvailable(): boolean {
+  const executable = process.platform === "win32" ? "bun.exe" : "bun";
+  return (process.env.PATH ?? "").split(delimiter).some((directory) => existsSync(join(directory, executable)));
+}
+
+function packageVersion(): string {
+  const packagePath = join(dirname(fileURLToPath(import.meta.url)), "..", "package.json");
+  return JSON.parse(readFileSync(packagePath, "utf8")).version as string;
 }
 
 function option(args: string[], name: string): string | undefined {
@@ -29,6 +41,7 @@ function option(args: string[], name: string): string | undefined {
 }
 
 async function runCommand(args: string[]): Promise<void> {
+  if (!bunAvailable()) fail("ax11y run needs bun on PATH to execute task checks (https://bun.sh)", 2);
   const target = args[0];
   const task = option(args, "--task");
   const model = option(args, "--model");
@@ -99,6 +112,10 @@ function compareCommand(args: string[]): void {
 
 function run(): void {
   const args = process.argv.slice(2);
+  if (args[0] === "--version" || args[0] === "-v") {
+    process.stdout.write(`${packageVersion()}\n`);
+    return;
+  }
   if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
     process.stdout.write(`${help}\n`);
     return;
