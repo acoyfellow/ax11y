@@ -1,6 +1,6 @@
 {
   "name": "ax11y",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Accessibility for coding agents: static checks and live agent runs that measure how easily an agent can use an npm package.",
   "type": "module",
   "license": "MIT",
