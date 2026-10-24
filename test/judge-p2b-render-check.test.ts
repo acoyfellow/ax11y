@@ -7,16 +7,15 @@ const repo = join(import.meta.dir, "..");
 const solutions = join(import.meta.dir, "render-solutions");
 const check = join(repo, "tasks", "render-hello", "check.ts");
 const scratch = mkdtempSync(join(tmpdir(), "ax11y-p2b-"));
-const cloudtermTarball = Bun.spawnSync(["npm", "pack", "cloudterm@0.0.14", "--pack-destination", scratch, "--silent"], { stdout: "pipe", stderr: "pipe" }).stdout.toString().trim();
-const cloudtermPackage = join(scratch, "cloudterm-package");
-mkdirSync(cloudtermPackage, { recursive: true });
-Bun.spawnSync(["tar", "-xzf", join(scratch, cloudtermTarball), "-C", cloudtermPackage, "--strip-components", "1"]);
+const installed = join(scratch, "installed");
+mkdirSync(installed, { recursive: true });
+writeFileSync(join(installed, "package.json"), JSON.stringify({ name: "sandbox", private: true, type: "module", dependencies: { cloudterm: "0.0.14" } }));
+const install = Bun.spawnSync(["npm", "install", "--no-audit", "--no-fund", "--ignore-scripts"], { cwd: installed, stdout: "pipe", stderr: "pipe" });
+if (install.exitCode !== 0) throw new Error(`npm install cloudterm@0.0.14 failed: ${install.stderr.toString().slice(-400)}`);
 
 function sandboxFor(solution: string): string {
   const dir = join(scratch, `${solution}-${Math.random().toString(36).slice(2, 8)}`);
-  mkdirSync(join(dir, "node_modules"), { recursive: true });
-  cpSync(cloudtermPackage, join(dir, "node_modules", "cloudterm"), { recursive: true });
-  writeFileSync(join(dir, "package.json"), JSON.stringify({ name: "sandbox", private: true, type: "module", dependencies: { cloudterm: "0.0.14" } }));
+  cpSync(installed, dir, { recursive: true });
   cpSync(join(solutions, solution), dir, { recursive: true });
   return dir;
 }
