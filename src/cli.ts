@@ -1,14 +1,20 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { checkDirectory, formatHuman, shouldFail } from "./check/index.js";
 import { loadTarget } from "./check/loader.js";
 import type { Level } from "./check/types.js";
-import { runTarget, summarize } from "./run/index.js";
+import { runTarget, summarize, type RunResult } from "./run/index.js";
+import { compareResults } from "./report/compare.js";
+import { json, markdownComparison, markdownReport, textComparison, textReport } from "./report/format.js";
+import { summarizeResult } from "./report/summary.js";
 
 const help = `ax11y accessibility checks for coding agents
 
 Usage:
   ax11y check <dir|npm-spec> [--json] [--fail-level A|AA|AAA]
-  ax11y run <target> --task <task-dir|builtin-name> --model <model> [--agent pi|command] [--agent-command <command>] [--runs N] [--timeout S] [--out DIR] [--json]
+  ax11y run <target> --task <task-dir|builtin-name> --model <model> [--compare <target>] [--agent pi|command] [--agent-command <command>] [--runs N] [--timeout S] [--out DIR] [--json]
+  ax11y report <result.json> [--json|--format markdown]
+  ax11y compare <a.json> <b.json> [--json|--format markdown]
   ax11y tasks
   ax11y --help`;
 
@@ -38,8 +44,27 @@ async function runCommand(args: string[]): Promise<void> {
   const timeoutSeconds = Number(timeoutValue);
   if (!Number.isInteger(runs) || runs < 1) fail("--runs must be a positive integer");
   if (!Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) fail("--timeout must be a positive number");
-  const result = await runTarget({ target, task, model, agent: agentValue, agentCommand, runs, timeoutSeconds });
-  const json = args.includes("--json");
+  const compareTarget = option(args, "--compare");
+  const settings = { task, model, agent: agentValue, agentCommand, runs, timeoutSeconds } as const;
+  let result: RunResult;
+  let compared: RunResult | undefined;
+  if (compareTarget) {
+    const aRuns = [] as RunResult["runs"];
+    const bRuns = [] as RunResult["runs"];
+    let first: RunResult | undefined;
+    let second: RunResult | undefined;
+    for (let index = 0; index < runs; index++) {
+      const a = await runTarget({ target, ...settings, runs: 1 });
+      const b = await runTarget({ target: compareTarget, ...settings, runs: 1 });
+      aRuns.push({ ...a.runs[0]!, index });
+      bRuns.push({ ...b.runs[0]!, index });
+      first ??= a;
+      second ??= b;
+    }
+    result = { ...first!, runs: aRuns };
+    compared = { ...second!, runs: bRuns };
+  } else result = await runTarget({ target, ...settings });
+  const jsonOutput = args.includes("--json");
   const out = option(args, "--out");
   if (out) {
     const { mkdirSync, writeFileSync } = await import("node:fs");
@@ -47,12 +72,29 @@ async function runCommand(args: string[]): Promise<void> {
     mkdirSync(out, { recursive: true });
     writeFileSync(join(out, "result.json"), JSON.stringify(result, null, 2) + "\n");
   }
-  if (json) process.stdout.write(`${JSON.stringify(result)}\n`);
+  if (jsonOutput) process.stdout.write(`${json(compared ? { a: result, b: compared, comparison: compareResults(result, compared) } : result)}\n`);
   else {
     for (const entry of result.runs) process.stdout.write(`run ${entry.index + 1}: ${entry.pass ? "pass" : "fail"} (${entry.tokens} tokens)\n`);
     process.stdout.write(`${summarize(result)}\n`);
+    if (compared) process.stdout.write(`${textComparison(compareResults(result, compared))}\n`);
   }
-  process.exitCode = result.runs.every((entry) => entry.pass) ? 0 : 1;
+  process.exitCode = compared ? 0 : (result.runs.every((entry) => entry.pass) ? 0 : 1);
+}
+
+function readResult(path: string): RunResult {
+  return JSON.parse(readFileSync(path, "utf8")) as RunResult;
+}
+
+function reportCommand(args: string[]): void {
+  if (!args[0]) fail("Usage: ax11y report <result.json> [--json|--format markdown]");
+  const summary = summarizeResult(readResult(args[0]));
+  process.stdout.write(`${args.includes("--json") ? json(summary) : option(args, "--format") === "markdown" ? markdownReport(summary) : textReport(summary)}\n`);
+}
+
+function compareCommand(args: string[]): void {
+  if (!args[0] || !args[1]) fail("Usage: ax11y compare <a.json> <b.json> [--json|--format markdown]");
+  const comparison = compareResults(readResult(args[0]), readResult(args[1]));
+  process.stdout.write(`${args.includes("--json") ? json(comparison) : option(args, "--format") === "markdown" ? markdownComparison(comparison) : textComparison(comparison)}\n`);
 }
 
 function run(): void {
@@ -69,6 +111,8 @@ function run(): void {
     runCommand(args.slice(1)).catch((error) => fail(error instanceof Error ? error.message : String(error)));
     return;
   }
+  if (args[0] === "report") return reportCommand(args.slice(1));
+  if (args[0] === "compare") return compareCommand(args.slice(1));
   if (args[0] !== "check" || !args[1]) fail("Usage: ax11y check <dir|npm-spec> [--json] [--fail-level A|AA|AAA]");
   const target = args[1];
   const json = args.includes("--json");

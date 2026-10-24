@@ -60,7 +60,8 @@ export async function runTarget(options: RunOptions): Promise<RunResult> {
       const check = processResult.timedOut ? { timedOut: true, output: "", code: null } : await execute("bun", [join(taskDirectory, "check.ts")], sandbox, undefined, 120000);
       runs.push({ index, pass: !processResult.timedOut && !check.timedOut && check.code === 0, tokens: metrics.tokens, costUsd: metrics.costUsd, toolCalls: metrics.toolCalls, turns: metrics.turns, wallMs: performance.now() - started, timedOut: processResult.timedOut, inventedImports: inventedImports(sandbox, loaded.directory), sandbox, transcript });
     }
-    return { ax11yVersion: "0.0.0", agent: options.agent, model: options.model, task: basename(taskDirectory), target, date: new Date().toISOString(), runs };
+    const packageJson = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "..", "package.json"), "utf8")) as { version: string };
+    return { ax11yVersion: packageJson.version, agent: options.agent, model: options.model, task: basename(taskDirectory), target, date: new Date().toISOString(), runs };
   } finally { loaded.cleanup(); }
 }
 
