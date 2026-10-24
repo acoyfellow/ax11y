@@ -144,7 +144,9 @@ async function main(): Promise<void> {
   if (!binary) failure("chrome-headless-shell is not installed in Playwright's cache");
   const server = startServer();
   const debugPort = await freePort();
-  const chrome = Bun.spawn([binary, `--remote-debugging-port=${debugPort}`, "--no-first-run", "about:blank"], { stdout: "ignore", stderr: "ignore" });
+  const linuxFlags = process.platform === "linux" ? ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"] : [];
+  const chrome = Bun.spawn([binary, `--remote-debugging-port=${debugPort}`, "--no-first-run", ...linuxFlags, "about:blank"], { stdout: "ignore", stderr: "pipe" });
+  const chromeErrors = new Response(chrome.stderr).text();
   let socket: WebSocket | undefined;
   const pageErrors: string[] = [];
   try {
@@ -154,7 +156,10 @@ async function main(): Promise<void> {
         return targets.find((target) => target.type === "page")?.webSocketDebuggerUrl;
       } catch { return undefined; }
     }, Boolean, 30_000);
-    if (!endpoint) failure("chrome did not start");
+    if (!endpoint) {
+      chrome.kill(9);
+      failure(`chrome did not start: ${(await chromeErrors).trim().split("\n").slice(-3).join(" | ").slice(0, 400)}`);
+    }
     socket = new WebSocket(endpoint);
     await new Promise<void>((done, reject) => { socket!.addEventListener("open", () => done(), { once: true }); socket!.addEventListener("error", () => reject(new Error("CDP connection failed")), { once: true }); });
     let nextId = 0;
