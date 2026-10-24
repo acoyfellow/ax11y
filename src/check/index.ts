@@ -1,4 +1,5 @@
 import { createContext } from "./context.js";
+import { loadTarget } from "./loader.js";
 import { rule as entryResolves } from "./rules/entry-resolves.js";
 import { rule as errorsActionable } from "./rules/errors-actionable.js";
 import { rule as exportsDocumented } from "./rules/exports-documented.js";
@@ -26,6 +27,15 @@ export function checkDirectory(directory: string, target: string): Report {
     level: order[minimum - 1] ?? "AAA",
     rules: rules.map((rule) => ({ id: rule.id, level: rule.level, status: failed.has(rule.id) ? "fail" : "pass" })),
   };
+}
+
+export async function check(target: string): Promise<Report> {
+  const loaded = loadTarget(target);
+  try {
+    return checkDirectory(loaded.directory, target);
+  } finally {
+    loaded.cleanup();
+  }
 }
 
 export function shouldFail(report: Report, failLevel: Level): boolean {

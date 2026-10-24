@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadTarget } from "../check/loader.js";
@@ -10,7 +10,7 @@ import { createSandbox, packageDetails } from "./sandbox.js";
 
 export type RunEntry = { index: number; pass: boolean; tokens: number; costUsd: number; toolCalls: number; turns: number; wallMs: number; timedOut: boolean; inventedImports: string[]; sandbox: string; transcript: string };
 export type RunResult = { ax11yVersion: string; agent: string; model: string; task: string; target: { name: string; version: string }; date: string; runs: RunEntry[] };
-export type RunOptions = { target: string; task: string; model: string; agent: "pi" | "command"; agentCommand?: string; runs: number; timeoutSeconds: number };
+export type RunOptions = { target: string; task: string; model: string; agent: "pi" | "command"; agentCommand?: string; runs: number; timeoutSeconds: number; out?: string; keep?: boolean };
 
 type ProcessResult = { output: string; timedOut: boolean; code: number | null };
 
@@ -60,25 +60,25 @@ export async function runTarget(options: RunOptions): Promise<RunResult> {
     const runs: RunEntry[] = [];
     for (let index = 0; index < options.runs; index++) {
       const sandbox = createSandbox(loaded.directory, target.name, existsSync(join(taskDirectory, "setup")) ? join(taskDirectory, "setup") : undefined);
-      const started = performance.now();
-      const agent = options.agent === "pi"
-        ? { command: "pi", args: piCommand(options.model).slice(1) }
-        : commandShell(options.agentCommand!);
-      const processResult = await execute(agent.command, agent.args, sandbox, prompt, options.timeoutSeconds * 1000);
-      const transcript = join(sandbox, ".ax11y-transcript.jsonl");
-      writeFileSync(transcript, processResult.output);
-      const metrics = parseTranscript(processResult.output);
-      const check = processResult.timedOut ? { timedOut: true, output: "", code: null } : await execute("bun", [join(taskDirectory, "check.ts")], sandbox, undefined, 120000);
-      runs.push({ index, pass: !processResult.timedOut && !check.timedOut && check.code === 0, tokens: metrics.tokens, costUsd: metrics.costUsd, toolCalls: metrics.toolCalls, turns: metrics.turns, wallMs: performance.now() - started, timedOut: processResult.timedOut, inventedImports: inventedImports(sandbox, loaded.directory), sandbox, transcript });
+      const transcript = options.out ? join(options.out, `run-${index}`, "transcript.jsonl") : join(sandbox, ".ax11y-transcript.jsonl");
+      try {
+        const started = performance.now();
+        const agent = options.agent === "pi"
+          ? { command: "pi", args: piCommand(options.model).slice(1) }
+          : commandShell(options.agentCommand!);
+        const processResult = await execute(agent.command, agent.args, sandbox, prompt, options.timeoutSeconds * 1000);
+        mkdirSync(dirname(transcript), { recursive: true });
+        writeFileSync(transcript, processResult.output);
+        const metrics = parseTranscript(processResult.output);
+        const check = processResult.timedOut ? { timedOut: true, output: "", code: null } : await execute("bun", [join(taskDirectory, "check.ts")], sandbox, undefined, 120000);
+        const sandboxRecord = options.keep || !options.out ? sandbox : join(options.out, `run-${index}`, "sandbox");
+        if (sandboxRecord !== sandbox) cpSync(sandbox, sandboxRecord, { recursive: true, dereference: true });
+        runs.push({ index, pass: !processResult.timedOut && !check.timedOut && check.code === 0, tokens: metrics.tokens, costUsd: metrics.costUsd, toolCalls: metrics.toolCalls, turns: metrics.turns, wallMs: performance.now() - started, timedOut: processResult.timedOut, inventedImports: inventedImports(sandbox, loaded.directory), sandbox: sandboxRecord, transcript });
+      } finally {
+        if (!options.keep) rmSync(sandbox, { recursive: true, force: true });
+      }
     }
     const packageJson = JSON.parse(readFileSync(join(packageRoot(), "package.json"), "utf8")) as { version: string };
     return { ax11yVersion: packageJson.version, agent: options.agent, model: options.model, task: basename(taskDirectory), target, date: new Date().toISOString(), runs };
   } finally { loaded.cleanup(); }
-}
-
-export function summarize(result: RunResult): string {
-  const passed = result.runs.filter((run) => run.pass).length;
-  const tokens = result.runs.map((run) => run.tokens).sort((a, b) => a - b);
-  const median = tokens.length % 2 ? tokens[(tokens.length - 1) / 2]! : (tokens[tokens.length / 2 - 1]! + tokens[tokens.length / 2]!) / 2;
-  return `${passed}/${result.runs.length} passed; median tokens ${median}`;
 }

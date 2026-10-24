@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { delimiter, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkDirectory, formatHuman, shouldFail } from "./check/index.js";
 import { loadTarget } from "./check/loader.js";
 import type { Level } from "./check/types.js";
-import { runTarget, summarize, type RunResult } from "./run/index.js";
+import { runTarget, type RunResult } from "./run/index.js";
 import { compareResults } from "./report/compare.js";
 import { json, markdownComparison, markdownReport, textComparison, textReport } from "./report/format.js";
 import { summarizeResult } from "./report/summary.js";
@@ -14,7 +14,7 @@ const help = `ax11y accessibility checks for coding agents
 
 Usage:
   ax11y check <dir|npm-spec> [--json] [--fail-level A|AA|AAA]
-  ax11y run <target> --task <task-dir|builtin-name> --model <model> [--compare <target>] [--agent pi|command] [--agent-command <command>] [--runs N] [--timeout S] [--out DIR] [--json]
+  ax11y run <target> --task <task-dir|builtin-name> --model <model> [--compare <target>] [--agent pi|command] [--agent-command <command>] [--runs N] [--timeout S] [--out DIR] [--keep] [--json]
   ax11y report <result.json> [--json|--format markdown]
   ax11y compare <a.json> <b.json> [--json|--format markdown]
   ax11y tasks
@@ -58,7 +58,8 @@ async function runCommand(args: string[]): Promise<void> {
   if (!Number.isInteger(runs) || runs < 1) fail("--runs must be a positive integer");
   if (!Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) fail("--timeout must be a positive number");
   const compareTarget = option(args, "--compare");
-  const settings = { task, model, agent: agentValue, agentCommand, runs, timeoutSeconds } as const;
+  const out = option(args, "--out") ?? join("ax11y-results", `${target.replaceAll(/[^a-zA-Z0-9._-]/g, "-")}-${task.replaceAll(/[^a-zA-Z0-9._-]/g, "-")}-${new Date().toISOString().replaceAll(/[:.]/g, "-")}`);
+  const settings = { task, model, agent: agentValue, agentCommand, runs, timeoutSeconds, out, keep: args.includes("--keep") } as const;
   let result: RunResult;
   let compared: RunResult | undefined;
   if (compareTarget) {
@@ -78,18 +79,14 @@ async function runCommand(args: string[]): Promise<void> {
     compared = { ...second!, runs: bRuns };
   } else result = await runTarget({ target, ...settings });
   const jsonOutput = args.includes("--json");
-  const out = option(args, "--out");
-  if (out) {
-    const { mkdirSync, writeFileSync } = await import("node:fs");
-    const { join } = await import("node:path");
-    mkdirSync(out, { recursive: true });
-    writeFileSync(join(out, "result.json"), JSON.stringify(result, null, 2) + "\n");
-  }
+  mkdirSync(out, { recursive: true });
+  writeFileSync(join(out, "result.json"), JSON.stringify(result, null, 2) + "\n");
   if (jsonOutput) process.stdout.write(`${json(compared ? { a: result, b: compared, comparison: compareResults(result, compared) } : result)}\n`);
   else {
     for (const entry of result.runs) process.stdout.write(`run ${entry.index + 1}: ${entry.pass ? "pass" : "fail"} (${entry.tokens} tokens)\n`);
-    process.stdout.write(`${summarize(result)}\n`);
+    process.stdout.write(`${textReport(summarizeResult(result))}\n`);
     if (compared) process.stdout.write(`${textComparison(compareResults(result, compared))}\n`);
+    process.stdout.write(`results: ${out}\n`);
   }
   process.exitCode = compared ? 0 : (result.runs.every((entry) => entry.pass) ? 0 : 1);
 }

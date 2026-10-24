@@ -15,9 +15,9 @@ Use the library when a check is part of another tool.
 ```ts
 import { check, rules, summarize, type Report } from "ax11y";
 
-const report: Report = check(".", ".");
+const report: Report = await check("<target>");
 console.log(report.level, rules.length);
-console.log(summarize({
+const summary = summarize({
   ax11yVersion: "0.1.0",
   agent: "pi",
   model: "example",
@@ -25,7 +25,8 @@ console.log(summarize({
   target: { name: "example", version: "1.0.0" },
   date: new Date().toISOString(),
   runs: [],
-}));
+});
+console.log(summary.passes);
 ```
 
 ## Definition
@@ -53,7 +54,7 @@ A means an agent can find and import the package. AA means an agent can follow t
 
 ## Agent runs
 
-Run a built-in task with `ax11y run <pkg> --task basic-import --model <model>`. Use `ax11y compare <a.json> <b.json>` for saved results, or `--compare <pkg>` to alternate two targets. Built-in tasks are listed by `ax11y tasks`; a task has `task.md`, a deterministic `check.ts`, and optional setup files.
+Run a built-in task with `ax11y run <pkg> --task basic-import --model <model>`. Results are written to `./ax11y-results/<target>-<task>-<timestamp>` by default, including `result.json` and each run's transcript; choose another directory with `--out <dir>`. Sandboxes are deleted after each run. Use `--keep` to retain them and inspect their paths in the result. Use `ax11y compare <a.json> <b.json>` for saved results, or `--compare <pkg>` to alternate two targets. Built-in tasks are listed by `ax11y tasks`; a task has `task.md`, a deterministic `check.ts`, and optional setup files.
 
 The measures are pass, total tokens, cost, tool calls, turns, wall time, and invented imports. Reports show the median and IQR for tokens and turns and a Wilson 95% interval for pass rate. Comparison uses an exact Mann-Whitney U test when applicable. A result is significant only when `p < 0.05` and the median differs by more than 10%. Failed runs count as infinite tokens.
 
@@ -75,7 +76,7 @@ agent pi, model gpt-5.6-terra, task render-hello, 1 runs, 2026-10-24, ax11y 0.1.
 
 ## Limits
 
-Every run score applies to one agent and one model on one task. Small run counts detect only large differences. Static rules check what is shipped, not whether the documentation is good prose. `run` needs bun. `render-hello` needs `chrome-headless-shell` from Playwright. There is no LLM-as-judge anywhere. Version 1 adapters are pi and any command that speaks pi JSON lines.
+Every run score applies to one agent and one model on one task. Small run counts detect only large differences. Static rules check what is shipped, not whether the documentation is good prose. `run` needs bun. `render-hello` needs `chrome-headless-shell` from Playwright; install it with `npx playwright install chromium-headless-shell`. There is no LLM-as-judge anywhere. Version 1 adapters are pi and any command that speaks pi JSON lines.
 
 ## Writing a task
 
@@ -87,7 +88,7 @@ Create a directory with `task.md` and `check.ts`. Write a prompt in `task.md`; `
 ax11y check . --fail-level AA
 ```
 
-The library API exports `check`, `run`, `summarize`, `compare`, `rules`, `formatHuman`, `shouldFail`, and `summarizeResult`. It also exports its report, rule, run, comparison, and summary types.
+The library API exports `check`, `run`, `summarize`, `compare`, and `rules`. It also exports its report, rule, run, comparison, and summary types.
 
 ## License
 
