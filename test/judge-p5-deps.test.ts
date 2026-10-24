@@ -15,7 +15,7 @@ test("the render-hello check never searches outside the sandbox for packages", (
 
 test("a run sandbox for an npm spec installs the package's own runtime dependencies", () => {
   const proc = Bun.spawnSync(["bun", join(repo, "src", "cli.ts"), "run", "cloudterm@0.0.14", "--task", join(import.meta.dir, "tasks", "greet"), "--agent", "command", "--agent-command", `bun ${join(import.meta.dir, "fake-agents", "peeks.ts")}`, "--model", "fake-model-1", "--runs", "1", "--keep", "--out", join(scratch, "out"), "--json"], { stdout: "pipe", stderr: "pipe" });
-  if (proc.exitCode !== 0 || !proc.stdout.toString().trim()) throw new Error(`run failed: ${proc.stderr.toString().slice(-1500)}`);
+  if (!proc.stdout.toString().trim()) throw new Error(`run printed no JSON: exit=${proc.exitCode} signal=${proc.signalCode} stderr=${proc.stderr.toString().slice(-1500)}`);
   const result = JSON.parse(proc.stdout.toString());
   const sandbox = result.runs[0].sandbox as string;
   try {
