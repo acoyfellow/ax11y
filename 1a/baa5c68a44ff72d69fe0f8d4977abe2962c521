@@ -1,0 +1,43 @@
+test/judge-p2b-render-check.test.ts
+  s_87bb0cc3d5fc34::t_fee10c68c151f7 1-58
+test/render-solutions/good/index.html
+  s_87bb0cc3d5fc34::t_79f328a32ab823 1
+test/render-solutions/good/main.js
+  s_87bb0cc3d5fc34::t_e721396e0ffe04 1-6
+test/render-solutions/input-broken/index.html
+  s_87bb0cc3d5fc34::t_8ae6e10d21c42b 1
+test/render-solutions/input-broken/main.js
+  s_87bb0cc3d5fc34::t_be4ead9a651690 1-5
+test/render-solutions/no-globals/index.html
+  s_87bb0cc3d5fc34::t_8fd7b29eb64120 1
+test/render-solutions/no-globals/main.js
+  s_87bb0cc3d5fc34::t_9bf1fbc00bf9ca 1-3
+test/render-solutions/no-write/index.html
+  s_87bb0cc3d5fc34::t_0ef5dafc27fb99 1
+test/render-solutions/no-write/main.js
+  s_87bb0cc3d5fc34::t_37ff81460f6508 1-5
+test/render-solutions/syntax-error/index.html
+  s_87bb0cc3d5fc34::t_1cfa9c0ec32bec 1
+test/render-solutions/syntax-error/main.js
+  s_87bb0cc3d5fc34::t_1b401a79c45dc1 1-3
+test/render-solutions/words-only/index.html
+  s_87bb0cc3d5fc34::t_8ef8861bf3476d 1
+test/render-solutions/words-only/main.js
+  s_87bb0cc3d5fc34::t_72c132be898902 1-2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1abaa5c68a44ff72d69fe0f8d4977abe2962c521",
+  "prompts": {},
+  "sessions": {
+    "s_87bb0cc3d5fc34": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a12ab1-4f16-71b5-98b4-fa9e4f420c7f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jordan Coeyman <jcoeyman@cloudflare.com>"
+    }
+  }
+}
