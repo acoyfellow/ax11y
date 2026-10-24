@@ -1,0 +1,25 @@
+tasks/render-hello/task.md
+  s_87bb0cc3d5fc34::t_e859c792ee67fe 1-14
+test/judge-p2b-render-check.test.ts
+  s_87bb0cc3d5fc34::t_7520dc3376813b 44,53-61
+test/render-solutions/string-input/index.html
+  s_87bb0cc3d5fc34::t_ce971c921290f2 1
+test/render-solutions/string-input/main.js
+  s_87bb0cc3d5fc34::t_4e3b8267e00b41 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "85acd8389aca1b0580d451203ec72bfb6d5832c8",
+  "prompts": {},
+  "sessions": {
+    "s_87bb0cc3d5fc34": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a12ab1-4f16-71b5-98b4-fa9e4f420c7f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jordan Coeyman <jcoeyman@cloudflare.com>"
+    }
+  }
+}
