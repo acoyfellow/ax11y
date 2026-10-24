@@ -36,24 +36,20 @@ function exportPath(value: unknown): string | undefined {
   return undefined;
 }
 
-function packageDirectory(name: string): string | undefined {
-  const local = join(packageRoot, name);
-  if (existsSync(local)) return local;
-  let directory = resolve(import.meta.dir);
-  while (dirname(directory) !== directory) {
-    const parent = dirname(directory);
-    for (const sibling of readdirSync(parent)) {
-      const candidate = join(parent, sibling, "node_modules", name);
-      if (existsSync(candidate)) return candidate;
-    }
-    directory = parent;
+function packageDirectory(name: string, sourcePath: string): string | undefined {
+  let directory = dirname(sourcePath);
+  while (inside(directory, root)) {
+    const candidate = join(directory, "node_modules", name);
+    if (existsSync(candidate)) return candidate;
+    if (directory === root) break;
+    directory = dirname(directory);
   }
   return undefined;
 }
 
-function resolvePackage(specifier: string): string | undefined {
+function resolvePackage(specifier: string, sourcePath: string): string | undefined {
   const { name, subpath } = packageParts(specifier);
-  const directory = packageDirectory(name);
+  const directory = packageDirectory(name, sourcePath);
   if (!directory) return undefined;
   if (subpath) {
     const candidate = resolve(directory, subpath);
@@ -72,10 +68,10 @@ function moduleUrl(path: string): string {
   return inside(path, packageRoot) ? `/node_modules/${relative(packageRoot, path).split(sep).join("/")}` : `/__external${path}`;
 }
 
-function rewriteImports(source: string): string {
+function rewriteImports(source: string, sourcePath: string): string {
   return source.replace(/(\bfrom\s*|\bimport\s*)(["'])([^"']+)\2/g, (whole, prefix: string, quote: string, specifier: string) => {
     if (specifier.startsWith(".") || specifier.startsWith("/") || specifier.startsWith("http:")) return whole;
-    const entry = resolvePackage(specifier);
+    const entry = resolvePackage(specifier, sourcePath);
     return entry ? `${prefix}${quote}${moduleUrl(entry)}${quote}` : whole;
   });
 }
@@ -98,7 +94,7 @@ function startServer(): { port: number; stop: () => void } {
       if ((!pathname.startsWith("/__external/") && !inside(requested, root)) || !existsSync(requested)) return new Response("not found", { status: 404 });
       if (extname(requested) === ".css") return new Response(cssModule(readFileSync(requested, "utf8")), { headers: { "content-type": "application/javascript" } });
       const source = readFileSync(requested, "utf8");
-      return new Response(extname(requested) === ".js" || extname(requested) === ".mjs" ? rewriteImports(source) : source, { headers: { "content-type": mime(requested) } });
+      return new Response(extname(requested) === ".js" || extname(requested) === ".mjs" ? rewriteImports(source, requested) : source, { headers: { "content-type": mime(requested) } });
     },
   });
   return { port: server.port!, stop: () => server.stop(true) };

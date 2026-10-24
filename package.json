@@ -45,7 +45,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsdown --config-loader native",
+    "build": "tsdown src/index.ts src/cli.ts --format esm --dts --platform neutral --no-config",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },

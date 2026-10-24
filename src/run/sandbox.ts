@@ -1,13 +1,22 @@
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
+
+function installTargetDependencies(directory: string, packageName: string): void {
+  const result = spawnSync("npm", ["install", "--no-audit", "--no-fund", "--ignore-scripts", "--omit=dev"], { cwd: directory, encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`Unable to install dependencies for ${packageName}: ${result.stderr || result.error?.message || "npm install failed"}`);
+  rmSync(join(directory, "package-lock.json"), { force: true });
+  rmSync(join(directory, "node_modules", ".package-lock.json"), { force: true });
+}
 
 export function createSandbox(targetDirectory: string, packageName: string, setupDirectory?: string): string {
   const directory = mkdtempSync(join(tmpdir(), "ax11y-run-"));
-  mkdirSync(join(directory, "node_modules", dirname(packageName)), { recursive: true });
-  cpSync(targetDirectory, join(directory, "node_modules", packageName), { recursive: true, dereference: true });
+  const target = join(directory, ".ax11y-target");
+  cpSync(targetDirectory, target, { recursive: true, dereference: true });
+  writeFileSync(join(directory, "package.json"), JSON.stringify({ name: "ax11y-sandbox", private: true, type: "module", dependencies: { [packageName]: "file:./.ax11y-target" } }) + "\n");
+  installTargetDependencies(directory, packageName);
   if (setupDirectory) cpSync(setupDirectory, directory, { recursive: true, dereference: true });
-  writeFileSync(join(directory, "package.json"), JSON.stringify({ name: "ax11y-sandbox", private: true, type: "module", dependencies: { [packageName]: "*" } }) + "\n");
   return directory;
 }
 
