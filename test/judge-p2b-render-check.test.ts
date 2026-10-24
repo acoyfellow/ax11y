@@ -41,13 +41,22 @@ test("a correct cloudterm solution passes", () => {
 }, 200000);
 
 describe("each broken solution fails", () => {
-  for (const solution of ["no-write", "no-globals", "input-broken", "syntax-error", "words-only"]) {
+  for (const solution of ["no-write", "no-globals", "input-broken", "syntax-error", "words-only", "string-input"]) {
     test(solution, () => {
       const { code, output } = runCheck(sandboxFor(solution));
       expect(code).not.toBe(0);
       expect(output.length).toBeGreaterThan(0);
     }, 200000);
   }
+});
+
+test("the task prompt states every requirement the check enforces", () => {
+  const prompt = readFileSync(join(repo, "tasks", "render-hello", "task.md"), "utf8");
+  expect(prompt).toContain("AX11Y-HELLO");
+  expect(prompt).toContain("window.termWrite");
+  expect(prompt).toContain("window.termInput");
+  expect(prompt).toMatch(/termInput[^\n]*an array/);
+  expect(prompt).toContain("{{package}}");
 });
 
 test("the check names what failed", () => {
