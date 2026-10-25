@@ -1,0 +1,39 @@
+README.md
+  s_87bb0cc3d5fc34::t_bbd85860e1fadf 57
+src/cli.ts
+  s_87bb0cc3d5fc34::t_1976abb3cfe198 17,53,63,72-73
+src/run/adapters/pi.ts
+  s_87bb0cc3d5fc34::t_7d962957e139d5 3-4
+src/run/index.ts
+  s_87bb0cc3d5fc34::t_02b82a81a214ca 13,35-40,73,79
+tasks/render-hello/check.ts
+  s_87bb0cc3d5fc34::t_c2fbd6b39eb7c2 55-61
+test/fake-agents/never-starts.ts
+  s_87bb0cc3d5fc34::t_ffa84badf84950 1-3
+test/judge-p2-run.test.ts
+  s_87bb0cc3d5fc34::t_501cc86e870386 137
+test/judge-p2b-render-check.test.ts
+  s_87bb0cc3d5fc34::t_587621e3946d14 40-45
+test/judge-p6-isolation.test.ts
+  s_87bb0cc3d5fc34::t_a0bd2a06e1102b 1-73
+test/render-solutions/good-with-css/index.html
+  s_87bb0cc3d5fc34::t_7861dfa329e73a 1
+test/render-solutions/good-with-css/main.js
+  s_87bb0cc3d5fc34::t_48a306cf20cb9e 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "c0e03bd7d4e981d833bd35e2d0eff3a7c8c3daca",
+  "prompts": {},
+  "sessions": {
+    "s_87bb0cc3d5fc34": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a12ab1-4f16-71b5-98b4-fa9e4f420c7f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jordan Coeyman <jcoeyman@cloudflare.com>"
+    }
+  }
+}
