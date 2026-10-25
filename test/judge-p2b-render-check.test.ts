@@ -39,6 +39,12 @@ test("a correct cloudterm solution passes", () => {
   expect(code).toBe(0);
 }, 200000);
 
+test("a correct solution that imports a package subpath export (cloudterm/style.css) passes", () => {
+  const { code, output } = runCheck(sandboxFor("good-with-css"));
+  if (code !== 0) console.log(output.slice(-800));
+  expect(code).toBe(0);
+}, 200000);
+
 describe("each broken solution fails", () => {
   for (const solution of ["no-write", "no-globals", "input-broken", "syntax-error", "words-only", "string-input"]) {
     test(solution, () => {

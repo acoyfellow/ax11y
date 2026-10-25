@@ -52,6 +52,13 @@ function resolvePackage(specifier: string, sourcePath: string): string | undefin
   const directory = packageDirectory(name, sourcePath);
   if (!directory) return undefined;
   if (subpath) {
+    const manifest = JSON.parse(readFileSync(join(directory, "package.json"), "utf8")) as Record<string, unknown>;
+    const exportsMap = manifest.exports && typeof manifest.exports === "object" ? manifest.exports as Record<string, unknown> : undefined;
+    const exported = exportsMap ? exportPath(exportsMap[`./${subpath}`]) : undefined;
+    if (exported) {
+      const target = resolve(directory, exported);
+      if (inside(target, directory) && existsSync(target)) return target;
+    }
     const candidate = resolve(directory, subpath);
     if (inside(candidate, directory) && existsSync(candidate)) return candidate;
     for (const extension of [".js", ".mjs", ".css"]) if (existsSync(`${candidate}${extension}`)) return `${candidate}${extension}`;

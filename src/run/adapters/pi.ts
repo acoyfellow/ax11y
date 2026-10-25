@@ -1,7 +1,7 @@
 export type TranscriptMetrics = { tokens: number; costUsd: number; toolCalls: number; turns: number };
 
-export function piCommand(model: string): string[] {
-  return ["pi", "-p", "--no-session", "--model", model, "--mode", "json"];
+export function piCommand(model: string, extensions: string[] = []): string[] {
+  return ["pi", "-p", "--no-session", "--no-extensions", "--no-skills", ...extensions.flatMap((extension) => ["-e", extension]), "--model", model, "--mode", "json"];
 }
 
 export function parseTranscript(text: string): TranscriptMetrics {

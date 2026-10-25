@@ -10,7 +10,7 @@ import { createSandbox, packageDetails } from "./sandbox.js";
 
 export type RunEntry = { index: number; pass: boolean; tokens: number; costUsd: number; toolCalls: number; turns: number; wallMs: number; timedOut: boolean; inventedImports: string[]; sandbox: string; transcript: string };
 export type RunResult = { ax11yVersion: string; agent: string; model: string; task: string; target: { name: string; version: string }; date: string; runs: RunEntry[] };
-export type RunOptions = { target: string; task: string; model: string; agent: "pi" | "command"; agentCommand?: string; runs: number; timeoutSeconds: number; out?: string; keep?: boolean };
+export type RunOptions = { target: string; task: string; model: string; agent: "pi" | "command"; agentCommand?: string; piExtensions?: string[]; runs: number; timeoutSeconds: number; out?: string; keep?: boolean };
 
 type ProcessResult = { output: string; timedOut: boolean; code: number | null };
 
@@ -30,6 +30,12 @@ function execute(command: string, args: string[], cwd: string, input: string | u
     child.on("close", (code) => { clearTimeout(timer); resolve({ output, timedOut, code }); });
     child.stdin.end(input);
   });
+}
+
+export class AgentDidNotStartError extends Error {
+  constructor(output: string) {
+    super(`The agent did not start: no assistant turn and no tokens. This is a harness error, not a score. Agent output:\n${output.trim().split("\n").slice(-5).join("\n").slice(0, 1200)}`);
+  }
 }
 
 function moduleDirectory(): string {
@@ -64,12 +70,13 @@ export async function runTarget(options: RunOptions): Promise<RunResult> {
       try {
         const started = performance.now();
         const agent = options.agent === "pi"
-          ? { command: "pi", args: piCommand(options.model).slice(1) }
+          ? { command: "pi", args: piCommand(options.model, options.piExtensions).slice(1) }
           : commandShell(options.agentCommand!);
         const processResult = await execute(agent.command, agent.args, sandbox, prompt, options.timeoutSeconds * 1000);
         mkdirSync(dirname(transcript), { recursive: true });
         writeFileSync(transcript, processResult.output);
         const metrics = parseTranscript(processResult.output);
+        if (!processResult.timedOut && metrics.turns === 0 && metrics.tokens === 0) throw new AgentDidNotStartError(processResult.output);
         const check = processResult.timedOut ? { timedOut: true, output: "", code: null } : await execute("bun", [join(taskDirectory, "check.ts")], sandbox, undefined, 120000);
         const sandboxRecord = options.keep || !options.out ? sandbox : join(options.out, `run-${index}`, "sandbox");
         if (sandboxRecord !== sandbox) cpSync(sandbox, sandboxRecord, { recursive: true, dereference: true });

@@ -14,7 +14,7 @@ const help = `ax11y accessibility checks for coding agents
 
 Usage:
   ax11y check <dir|npm-spec> [--json] [--fail-level A|AA|AAA]
-  ax11y run <target> --task <task-dir|builtin-name> --model <model> [--compare <target>] [--agent pi|command] [--agent-command <command>] [--runs N] [--timeout S] [--out DIR] [--keep] [--json]
+  ax11y run <target> --task <task-dir|builtin-name> --model <model> [--compare <target>] [--agent pi|command] [--agent-command <command>] [--pi-extension <path>]... [--runs N] [--timeout S] [--out DIR] [--keep] [--json]
   ax11y report <result.json> [--json|--format markdown]
   ax11y compare <a.json> <b.json> [--json|--format markdown]
   ax11y tasks
@@ -50,6 +50,7 @@ async function runCommand(args: string[]): Promise<void> {
   const agentValue = option(args, "--agent") ?? "pi";
   if (agentValue !== "pi" && agentValue !== "command") fail("--agent must be pi or command");
   const agentCommand = option(args, "--agent-command");
+  const piExtensions = args.flatMap((value, index) => (value === "--pi-extension" && args[index + 1] ? [args[index + 1]!] : []));
   if (agentValue === "command" && !agentCommand) fail("--agent-command is required when --agent command");
   const runsValue = option(args, "--runs") ?? "1";
   const timeoutValue = option(args, "--timeout") ?? "600";
@@ -59,7 +60,7 @@ async function runCommand(args: string[]): Promise<void> {
   if (!Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) fail("--timeout must be a positive number");
   const compareTarget = option(args, "--compare");
   const out = option(args, "--out") ?? join("ax11y-results", `${target.replaceAll(/[^a-zA-Z0-9._-]/g, "-")}-${task.replaceAll(/[^a-zA-Z0-9._-]/g, "-")}-${new Date().toISOString().replaceAll(/[:.]/g, "-")}`);
-  const settings = { task, model, agent: agentValue, agentCommand, runs, timeoutSeconds, out, keep: args.includes("--keep") } as const;
+  const settings = { task, model, agent: agentValue, agentCommand, piExtensions, runs, timeoutSeconds, out, keep: args.includes("--keep") } as const;
   let result: RunResult;
   let compared: RunResult | undefined;
   if (compareTarget) {
@@ -68,8 +69,8 @@ async function runCommand(args: string[]): Promise<void> {
     let first: RunResult | undefined;
     let second: RunResult | undefined;
     for (let index = 0; index < runs; index++) {
-      const a = await runTarget({ target, ...settings, runs: 1 });
-      const b = await runTarget({ target: compareTarget, ...settings, runs: 1 });
+      const a = await runTarget({ target, ...settings, runs: 1, out: join(out, "a", `run-${index}`) });
+      const b = await runTarget({ target: compareTarget, ...settings, runs: 1, out: join(out, "b", `run-${index}`) });
       aRuns.push({ ...a.runs[0]!, index });
       bRuns.push({ ...b.runs[0]!, index });
       first ??= a;

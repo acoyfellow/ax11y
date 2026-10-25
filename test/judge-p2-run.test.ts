@@ -134,7 +134,7 @@ test("the pi adapter counts tokens from a real pi --mode json transcript correct
 test("the pi adapter builds the documented command with the model", async () => {
   const module = await import(join(repo, "src", "run", "adapters", "pi.ts"));
   const command = module.piCommand as (model: string) => string[];
-  expect(command("gpt-x")).toEqual(["pi", "-p", "--no-session", "--model", "gpt-x", "--mode", "json"]);
+  expect(command("gpt-x")).toEqual(["pi", "-p", "--no-session", "--no-extensions", "--no-skills", "--model", "gpt-x", "--mode", "json"]);
 });
 
 test("--model is required; a missing model is a clear error", () => {
