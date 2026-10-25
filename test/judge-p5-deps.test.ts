@@ -1,5 +1,5 @@
 import { afterAll, expect, test } from "bun:test";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, lstatSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -43,3 +43,15 @@ test("the build does not depend on a TypeScript config loader", () => {
 });
 
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
+
+test("a run with --out records the sandbox for a target that has dependencies", () => {
+  const out = join(scratch, "out3");
+  const proc = Bun.spawnSync(["bun", join(repo, "src", "cli.ts"), "run", "cloudterm@0.0.14", "--task", join(import.meta.dir, "tasks", "greet"), "--agent", "command", "--agent-command", `bun ${join(import.meta.dir, "fake-agents", "peeks.ts")}`, "--model", "fake-model-1", "--runs", "1", "--out", out, "--json"], { stdout: "pipe", stderr: "pipe" });
+  expect(proc.stderr.toString()).not.toContain("EEXIST");
+  const result = JSON.parse(proc.stdout.toString());
+  const recorded = result.runs[0].sandbox as string;
+  expect(recorded.startsWith(out)).toBe(true);
+  expect(lstatSync(join(recorded, "node_modules", "cloudterm")).isSymbolicLink()).toBe(false);
+  expect(existsSync(join(recorded, "node_modules", "cloudterm", "package.json"))).toBe(true);
+  expect(existsSync(join(recorded, "node_modules", "@chenglou", "pretext", "package.json"))).toBe(true);
+}, 300000);

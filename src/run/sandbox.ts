@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -16,6 +16,9 @@ export function createSandbox(targetDirectory: string, packageName: string, setu
   cpSync(targetDirectory, target, { recursive: true, dereference: true });
   writeFileSync(join(directory, "package.json"), JSON.stringify({ name: "ax11y-sandbox", private: true, type: "module", dependencies: { [packageName]: "file:./.ax11y-target" } }) + "\n");
   installTargetDependencies(directory, packageName);
+  const installed = join(directory, "node_modules", packageName);
+  rmSync(installed, { recursive: true, force: true });
+  renameSync(target, installed);
   if (setupDirectory) cpSync(setupDirectory, directory, { recursive: true, dereference: true });
   return directory;
 }
